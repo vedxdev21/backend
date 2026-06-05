@@ -28,7 +28,7 @@ const app = express();
 // ---- Global Middleware ----
 app.use(helmet());
 app.use(cors({
-  origin: env.ALLOWED_ORIGINS.split(','),
+  origin: env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim().replace(/\/$/, '')),
   credentials: true,
 }));
 app.use(compression());

@@ -10,7 +10,7 @@ let ioInstance: Server<ClientToServerEvents, ServerToClientEvents, InterServerEv
 export const initializeSocket = (httpServer: http.Server) => {
   const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(httpServer, {
     cors: {
-      origin: env.ALLOWED_ORIGINS.split(','),
+      origin: env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim().replace(/\/$/, '')),
       credentials: true,
     },
   });
