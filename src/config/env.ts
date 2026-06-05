@@ -46,7 +46,7 @@ const envSchema = z.object({
   // App
   APP_NAME: z.string().default('ProjectX'),
   APP_URL: z.string().default('http://localhost:3000'),
-  ALLOWED_ORIGINS: z.string().default('http://localhost:3000,http://localhost:5173'),
+  ALLOWED_ORIGINS: z.string().default('http://localhost:3000,http://localhost:5173,https://www.fyndkaro.com,https://fyndkaro.com'),
   GEOCODING_PROVIDER: z.enum(['locationiq', 'fallback']).default('locationiq'),
   LOCATIONIQ_BASE_URL: z.string().default('https://us1.locationiq.com'),
   LOCATIONIQ_ACCESS_TOKEN: z.string().default(''),
