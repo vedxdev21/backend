@@ -1,0 +1,753 @@
+// ============================================
+// ProjectX — Complete Prisma Schema
+// MongoDB + All 22 Models
+// ============================================
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ════════════════════════════════════════════
+// ENUMS
+// ════════════════════════════════════════════
+
+enum UserRole {
+  USER
+  OWNER
+  COOK_PROVIDER
+  MESS_OWNER
+  ADMIN
+}
+
+enum AuthProvider {
+  PHONE
+  GOOGLE
+  EMAIL
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum PropertyType {
+  SINGLE_ROOM_INDEPENDENT
+  SINGLE_ROOM_DEPENDENT
+  SHARED_ROOM
+  ONE_RK
+  ONE_BHK
+  TWO_BHK
+  THREE_BHK
+  DUPLEX
+  HOSTEL_BOYS
+  HOSTEL_GIRLS
+  PG
+  SHOP
+  OFFICE
+  GODOWN
+  CLINIC
+  RESTAURANT_SPACE
+  PARKING
+}
+
+enum PropertyCategory {
+  RESIDENTIAL
+  STUDENT
+  COMMERCIAL
+}
+
+enum AvailableFor {
+  BOYS_ONLY
+  GIRLS_ONLY
+  BOTH
+  FAMILY_ONLY
+  BACHELORS_ALLOWED
+  STUDENTS_ONLY
+  WORKING_PROFESSIONALS
+  ANY
+}
+
+enum FurnishingType {
+  FURNISHED
+  SEMI_FURNISHED
+  UNFURNISHED
+}
+
+enum NegotiableType {
+  FIXED
+  SLIGHTLY_NEGOTIABLE
+  NEGOTIABLE
+}
+
+enum MinimumStay {
+  NO_MINIMUM
+  THREE_MONTHS
+  SIX_MONTHS
+  ELEVEN_MONTHS
+  ONE_YEAR_PLUS
+}
+
+enum PropertyStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  RENTED
+  REJECTED
+  DELETED
+}
+
+enum FoodPreference {
+  VEG
+  NON_VEG
+  BOTH
+}
+
+enum SmokingPreference {
+  NO
+  YES
+}
+
+enum DrinkingPreference {
+  NO
+  OCCASIONAL
+  REGULAR
+}
+
+enum SleepSchedule {
+  EARLY_BIRD
+  NIGHT_OWL
+}
+
+enum PersonalityType {
+  INTROVERT
+  EXTROVERT
+  AMBIVERT
+}
+
+enum CleanlinessLevel {
+  VERY_CLEAN
+  NORMAL
+  FLEXIBLE
+}
+
+enum GuestPreference {
+  OKAY
+  SOMETIMES
+  NOT_OKAY
+}
+
+enum NoisePreference {
+  OKAY
+  PREFER_QUIET
+}
+
+enum Profession {
+  STUDENT
+  WORKING
+  FREELANCER
+  BUSINESS
+}
+
+enum GenderPreference {
+  SAME
+  ANY
+}
+
+enum InterestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum RoommateDuration {
+  ONE_TO_THREE_MONTHS
+  THREE_TO_SIX_MONTHS
+  SIX_TO_TWELVE_MONTHS
+  ONE_YEAR_PLUS
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+}
+
+enum CookServiceType {
+  ONE_TIME_VISIT
+  DAILY_COOK
+  MONTHLY_SUBSCRIPTION
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  LOCATION
+  LISTING_SHARE
+}
+
+enum ChatContext {
+  PROPERTY
+  ROOMMATE
+  MESS
+  COOK
+}
+
+enum NotificationType {
+  PROPERTY_INQUIRY
+  PROPERTY_ALERT_MATCH
+  SAVED_PROPERTY_RENTED
+  ROOMMATE_INTEREST_RECEIVED
+  ROOMMATE_INTEREST_ACCEPTED
+  ROOMMATE_INTEREST_DECLINED
+  MESS_INQUIRY
+  COOK_INQUIRY
+  NEW_CHAT_MESSAGE
+  WELCOME
+  PROFILE_VERIFIED
+  LISTING_VERIFIED
+  ADMIN_ANNOUNCEMENT
+  SERVICE_LAUNCHED
+}
+
+enum ReviewTargetType {
+  PROPERTY
+  MESS
+  COOK
+  ROOMMATE
+}
+
+enum ReportTargetType {
+  PROPERTY
+  MESS
+  COOK
+  ROOMMATE
+  USER
+  REVIEW
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  WARNED
+  BLOCKED
+  REMOVED
+  DISMISSED
+}
+
+enum ComingSoonService {
+  HOME_SERVICES
+  VEHICLE_SERVICES
+  MEDICAL_SERVICES
+  UTILITY_BOOKING
+  LABOUR_CHOWK
+}
+
+// ════════════════════════════════════════════
+// MODEL: User
+// ════════════════════════════════════════════
+
+model User {
+  id              String       @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  phone           String       @unique
+  email           String?
+  passwordHash    String?
+  profilePhoto    String?
+  authProvider    AuthProvider  @default(PHONE)
+  googleId        String?      @unique
+  role            UserRole     @default(USER)
+
+  isPhoneVerified   Boolean @default(false)
+  isEmailVerified   Boolean @default(false)
+  isProfileComplete Boolean @default(false)
+  isBlocked         Boolean @default(false)
+
+  city     String?
+  area     String?
+  location Json?
+
+  interests String[]
+  language  String   @default("en")
+
+  otpCode      String?
+  otpExpiresAt DateTime?
+
+  refreshToken String?
+
+  referralCode String? @unique
+  referredBy   String? @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  properties        Property[]
+  propertyInquiries PropertyInquiry[]
+  propertySaved     PropertySaved[]
+  propertyAlerts    PropertyAlert[]
+  roommateProfile   RoommateProfile?
+  messProfile       MessProfile?
+  cookProfile       CookProfile?
+  sentMessages      ChatMessage[]        @relation("sender")
+  notifications     Notification[]
+  reviews           Review[]
+  reports           Report[]
+  comingSoonSignups ComingSoonSignup[]
+  referrals         Referral[]           @relation("referrer")
+}
+
+// ════════════════════════════════════════════
+// MODELS: Property
+// ════════════════════════════════════════════
+
+model Property {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  ownerId  String @db.ObjectId
+  owner    User   @relation(fields: [ownerId], references: [id])
+
+  title        String
+  description  String
+  propertyType PropertyType
+  category     PropertyCategory
+  availableFor AvailableFor
+  dependency   String
+
+  rent              Int
+  deposit           Int?
+  negotiable        NegotiableType  @default(FIXED)
+  maintenanceExtra  Boolean         @default(false)
+  maintenanceAmount Int?
+  minimumStay       MinimumStay     @default(NO_MINIMUM)
+  availableFrom     DateTime
+
+  furnishing   FurnishingType
+  amenities    String[]
+  specialRules String?
+
+  address      String
+  area         String
+  city         String
+  pincode      String
+  location     Json
+  nearLandmark String?
+
+  photos       String[]
+  videoTourUrl String?
+
+  status     PropertyStatus @default(DRAFT)
+  isVerified Boolean        @default(false)
+  isFeatured Boolean        @default(false)
+  viewCount  Int            @default(0)
+  slug       String         @unique
+  isDeleted  Boolean        @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  inquiries   PropertyInquiry[]
+  savedBy     PropertySaved[]
+  numberViews PropertyNumberView[]
+  reviews     Review[]
+}
+
+model PropertyInquiry {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  propertyId String   @db.ObjectId
+  property   Property @relation(fields: [propertyId], references: [id])
+  userId     String   @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id])
+  message    String?
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+model PropertySaved {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  propertyId String   @db.ObjectId
+  property   Property @relation(fields: [propertyId], references: [id])
+  userId     String   @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@unique([propertyId, userId])
+}
+
+model PropertyAlert {
+  id           String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String          @db.ObjectId
+  user         User            @relation(fields: [userId], references: [id])
+  city         String
+  area         String?
+  budgetMin    Int?
+  budgetMax    Int?
+  propertyType PropertyType?
+  availableFor AvailableFor?
+  furnishing   FurnishingType?
+  isActive     Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model PropertyNumberView {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  propertyId String   @db.ObjectId
+  property   Property @relation(fields: [propertyId], references: [id])
+  viewerId   String   @db.ObjectId
+  viewedAt   DateTime @default(now())
+
+  @@unique([propertyId, viewerId])
+}
+
+// ════════════════════════════════════════════
+// MODELS: Roommate
+// ════════════════════════════════════════════
+
+model RoommateProfile {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @unique @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  photo       String
+  age         Int
+  gender      Gender
+  profession  Profession
+  collegeName String?
+  companyName String?
+
+  food        FoodPreference
+  smoking     SmokingPreference
+  drinking    DrinkingPreference
+  sleep       SleepSchedule
+  personality PersonalityType
+  petFriendly Boolean          @default(false)
+  cleanliness CleanlinessLevel
+  guests      GuestPreference
+  noise       NoisePreference
+
+  budgetMin       Int
+  budgetMax       Int
+  preferredAreas  String[]
+  moveInDate      DateTime?
+  duration        RoommateDuration?
+  roomPreferences String[]
+  preferredGender GenderPreference @default(ANY)
+
+  bio           String
+  hasRoom       Boolean  @default(false)
+  roomAddress   String?
+  roomArea      String?
+  rentPerPerson Int?
+  occupants     Int?
+  roomPhotos    String[]
+  roomAmenities String[]
+
+  city     String
+  area     String?
+  location Json?
+
+  isActive   Boolean @default(true)
+  isVerified Boolean @default(false)
+  viewCount  Int     @default(0)
+  isDeleted  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sentInterests     RoommateInterest[] @relation("sender")
+  receivedInterests RoommateInterest[] @relation("receiver")
+  groups            RoommateGroupMember[]
+}
+
+model RoommateInterest {
+  id         String          @id @default(auto()) @map("_id") @db.ObjectId
+  senderId   String          @db.ObjectId
+  sender     RoommateProfile @relation("sender", fields: [senderId], references: [id])
+  receiverId String          @db.ObjectId
+  receiver   RoommateProfile @relation("receiver", fields: [receiverId], references: [id])
+  message    String?
+  status     InterestStatus  @default(PENDING)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@unique([senderId, receiverId])
+}
+
+model RoommateGroup {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  city        String
+  area        String?
+  maxMembers  Int      @default(10)
+  createdById String   @db.ObjectId
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members RoommateGroupMember[]
+}
+
+model RoommateGroupMember {
+  id        String          @id @default(auto()) @map("_id") @db.ObjectId
+  groupId   String          @db.ObjectId
+  group     RoommateGroup   @relation(fields: [groupId], references: [id])
+  profileId String          @db.ObjectId
+  profile   RoommateProfile @relation(fields: [profileId], references: [id])
+  joinedAt  DateTime        @default(now())
+
+  @@unique([groupId, profileId])
+}
+
+// ════════════════════════════════════════════
+// MODELS: Mess / Tiffin
+// ════════════════════════════════════════════
+
+model MessProfile {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  ownerId   String @unique @db.ObjectId
+  owner     User   @relation(fields: [ownerId], references: [id])
+
+  name        String
+  ownerName   String
+  description String
+  photos      String[]
+
+  address  String
+  area     String
+  city     String
+  pincode  String
+  location Json
+
+  foodType  FoodPreference
+  mealTypes MealType[]
+
+  timings Json
+
+  pricePerMeal      Int?
+  monthlyOneMeal    Int?
+  monthlyTwoMeals   Int?
+  monthlyThreeMeals Int?
+  trialMealPrice    Int?
+
+  deliveryAvailable Boolean @default(false)
+  deliveryRadius    Float?
+
+  tiffinService   Boolean  @default(false)
+  seatingCapacity Int?
+  features        String[]
+
+  isVerified Boolean @default(false)
+  isFeatured Boolean @default(false)
+  isActive   Boolean @default(true)
+  viewCount  Int     @default(0)
+  slug       String  @unique
+  isDeleted  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  menus   MessMenu[]
+  savedBy MessSaved[]
+  reviews Review[]
+}
+
+model MessMenu {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  messId    String      @db.ObjectId
+  mess      MessProfile @relation(fields: [messId], references: [id])
+  date      DateTime
+  mealType  MealType
+  items     String[]
+  photo     String?
+  createdAt DateTime    @default(now())
+
+  @@unique([messId, date, mealType])
+}
+
+model MessSaved {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  messId    String      @db.ObjectId
+  mess      MessProfile @relation(fields: [messId], references: [id])
+  userId    String      @db.ObjectId
+  createdAt DateTime    @default(now())
+
+  @@unique([messId, userId])
+}
+
+// ════════════════════════════════════════════
+// MODELS: Cook
+// ════════════════════════════════════════════
+
+model CookProfile {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @unique @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  fullName   String
+  photo      String
+  gender     Gender
+  age        Int
+  experience Int
+
+  speciality   FoodPreference
+  cuisineTypes String[]
+  serviceTypes CookServiceType[]
+
+  pricePerVisit   Int?
+  monthlyOneMeal  Int?
+  monthlyTwoMeals Int?
+
+  serviceAreas String[]
+  city         String
+  pincode      String
+  location     Json?
+
+  availableSlots Json
+
+  isVerified Boolean @default(false)
+  isFeatured Boolean @default(false)
+  isActive   Boolean @default(true)
+  viewCount  Int     @default(0)
+  slug       String  @unique
+  isDeleted  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  savedBy CookSaved[]
+  reviews Review[]
+}
+
+model CookSaved {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  cookId    String      @db.ObjectId
+  cook      CookProfile @relation(fields: [cookId], references: [id])
+  userId    String      @db.ObjectId
+  createdAt DateTime    @default(now())
+
+  @@unique([cookId, userId])
+}
+
+// ════════════════════════════════════════════
+// MODELS: Chat
+// ════════════════════════════════════════════
+
+model ChatConversation {
+  id             String      @id @default(auto()) @map("_id") @db.ObjectId
+  participantIds String[]    @db.ObjectId
+  context        ChatContext
+  contextId      String?     @db.ObjectId
+  lastMessage    String?
+  lastMessageAt  DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  messages ChatMessage[]
+}
+
+model ChatMessage {
+  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  conversationId String           @db.ObjectId
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id])
+  senderId       String           @db.ObjectId
+  sender         User             @relation("sender", fields: [senderId], references: [id])
+  type           MessageType      @default(TEXT)
+  content        String
+  metadata       Json?
+  isRead         Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+}
+
+// ════════════════════════════════════════════
+// MODEL: Notification
+// ════════════════════════════════════════════
+
+model Notification {
+  id        String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String           @db.ObjectId
+  user      User             @relation(fields: [userId], references: [id])
+  type      NotificationType
+  title     String
+  body      String
+  data      Json?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+}
+
+// ════════════════════════════════════════════
+// MODEL: Review (shared across services)
+// ════════════════════════════════════════════
+
+model Review {
+  id         String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String           @db.ObjectId
+  user       User             @relation(fields: [userId], references: [id])
+  targetType ReviewTargetType
+  targetId   String           @db.ObjectId
+
+  propertyId String?      @db.ObjectId
+  property   Property?    @relation(fields: [propertyId], references: [id])
+  messId     String?      @db.ObjectId
+  mess       MessProfile? @relation(fields: [messId], references: [id])
+  cookId     String?      @db.ObjectId
+  cook       CookProfile? @relation(fields: [cookId], references: [id])
+
+  rating     Int
+  comment    String?
+  photos     String[]
+  isHidden   Boolean  @default(false)
+  isFeatured Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ════════════════════════════════════════════
+// MODELS: Common (Reports, Coming Soon, Referrals, Settings)
+// ════════════════════════════════════════════
+
+model Report {
+  id          String           @id @default(auto()) @map("_id") @db.ObjectId
+  reporterId  String           @db.ObjectId
+  reporter    User             @relation(fields: [reporterId], references: [id])
+  targetType  ReportTargetType
+  targetId    String           @db.ObjectId
+  reason      String
+  description String?
+  status      ReportStatus     @default(PENDING)
+  adminNote   String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model ComingSoonSignup {
+  id        String            @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String?           @db.ObjectId
+  user      User?             @relation(fields: [userId], references: [id])
+  service   ComingSoonService
+  phone     String?
+  email     String?
+  city      String?
+  createdAt DateTime          @default(now())
+
+  @@unique([service, phone])
+}
+
+model Referral {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  referrerId    String   @db.ObjectId
+  referrer      User     @relation("referrer", fields: [referrerId], references: [id])
+  referredPhone String
+  isConverted   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model AdminSetting {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+}

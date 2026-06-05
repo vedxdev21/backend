@@ -1,0 +1,715 @@
+{
+  "info": {
+    "name": "ProjectX API v1",
+    "description": "Complete API collection for ProjectX — All-in-one daily life services platform for India.\n\nBase URL: http://localhost:5000/api/v1\n\nAuthentication: Bearer token in Authorization header",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api/v1" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "adminToken", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "propertyId", "value": "" },
+    { "key": "messId", "value": "" },
+    { "key": "cookId", "value": "" },
+    { "key": "roommateProfileId", "value": "" },
+    { "key": "conversationId", "value": "" },
+    { "key": "notificationId", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "🔐 Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:5000/api/health",
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [{ "listen": "test", "script": { "exec": ["const json = pm.response.json();", "if (json.data?.id) pm.collectionVariables.set('userId', json.data.id);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Keshav Kumar\",\n  \"phone\": \"+919876543210\",\n  \"email\": \"keshav@example.com\",\n  \"password\": \"test123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Send OTP",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/send-otp",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+919876543210\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "event": [{ "listen": "test", "script": { "exec": ["const json = pm.response.json();", "if (json.data?.accessToken) {", "  pm.collectionVariables.set('accessToken', json.data.accessToken);", "  pm.collectionVariables.set('userId', json.data.user.id);", "}"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/verify-otp",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+919876543210\",\n  \"otp\": \"123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login (Phone + OTP)",
+          "event": [{ "listen": "test", "script": { "exec": ["const json = pm.response.json();", "if (json.data?.accessToken) {", "  pm.collectionVariables.set('accessToken', json.data.accessToken);", "  pm.collectionVariables.set('userId', json.data.user.id);", "}"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login/phone",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+919876543210\",\n  \"otp\": \"123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login (Email + Password)",
+          "event": [{ "listen": "test", "script": { "exec": ["const json = pm.response.json();", "if (json.data?.accessToken) {", "  pm.collectionVariables.set('accessToken', json.data.accessToken);", "}"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login/email",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"keshav@example.com\",\n  \"password\": \"test123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Google Auth",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/google",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idToken\": \"YOUR_GOOGLE_ID_TOKEN\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [{ "listen": "test", "script": { "exec": ["const json = pm.response.json();", "if (json.data?.accessToken) pm.collectionVariables.set('accessToken', json.data.accessToken);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/refresh-token",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/forgot-password",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+919876543210\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/reset-password",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+919876543210\",\n  \"otp\": \"123456\",\n  \"newPassword\": \"newpass123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/logout",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 User",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": { "method": "GET", "url": "{{baseUrl}}/users/me", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Profile Setup",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/users/profile-setup",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Keshav Kumar\",\n  \"city\": \"Bhopal\",\n  \"area\": \"MP Nagar\",\n  \"lat\": 23.2332,\n  \"lng\": 77.4345,\n  \"interests\": [\"FIND_ROOM\", \"FIND_MESS\"]\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/users/me",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Keshav Updated\",\n  \"city\": \"Indore\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Location",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/users/me/location",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lat\": 23.2332,\n  \"lng\": 77.4345,\n  \"city\": \"Bhopal\",\n  \"area\": \"MP Nagar\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Language",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/users/me/language",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"language\": \"hi\"\n}" }
+          }
+        },
+        {
+          "name": "Get My Stats",
+          "request": { "method": "GET", "url": "{{baseUrl}}/users/me/stats", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Get Public Profile",
+          "request": { "method": "GET", "url": "{{baseUrl}}/users/{{userId}}", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        }
+      ]
+    },
+    {
+      "name": "📍 Location",
+      "item": [
+        {
+          "name": "Get All Cities",
+          "request": { "method": "GET", "url": "{{baseUrl}}/location/cities" }
+        },
+        {
+          "name": "Get Areas for City",
+          "request": { "method": "GET", "url": "{{baseUrl}}/location/cities/Bhopal/areas" }
+        },
+        {
+          "name": "Detect Location",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/location/detect",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"lat\": 23.2332,\n  \"lng\": 77.4345\n}" }
+          }
+        },
+        {
+          "name": "Area Guide",
+          "request": { "method": "GET", "url": "{{baseUrl}}/location/area-guide/Bhopal", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        }
+      ]
+    },
+    {
+      "name": "🏠 Property",
+      "item": [
+        {
+          "name": "Browse Properties",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/properties?city=Bhopal&page=1&limit=12", "host": ["{{baseUrl}}"], "path": ["properties"], "query": [{ "key": "city", "value": "Bhopal" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "12" }, { "key": "type", "value": "", "disabled": true }, { "key": "budgetMin", "value": "", "disabled": true }, { "key": "budgetMax", "value": "", "disabled": true }, { "key": "furnishing", "value": "", "disabled": true }, { "key": "sort", "value": "createdAt", "disabled": true }] }, "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Create Property",
+          "event": [{ "listen": "test", "script": { "exec": ["const json = pm.response.json();", "if (json.data?.id) pm.collectionVariables.set('propertyId', json.data.id);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/properties",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"2BHK Near MP Nagar Zone-1\",\n  \"description\": \"Spacious 2BHK flat near MP Nagar Zone-1. Well ventilated with attached bathrooms. 24/7 water supply.\",\n  \"propertyType\": \"TWO_BHK\",\n  \"category\": \"RESIDENTIAL\",\n  \"availableFor\": \"BOTH\",\n  \"dependency\": \"Independent\",\n  \"rent\": 12000,\n  \"deposit\": 24000,\n  \"negotiable\": \"SLIGHTLY_NEGOTIABLE\",\n  \"availableFrom\": \"2026-05-01\",\n  \"furnishing\": \"SEMI_FURNISHED\",\n  \"amenities\": [\"WIFI\", \"AC\", \"BIKE_PARKING\", \"GEYSER\", \"RO_WATER\"],\n  \"address\": \"123, Zone-1, MP Nagar\",\n  \"area\": \"MP Nagar\",\n  \"city\": \"Bhopal\",\n  \"pincode\": \"462011\",\n  \"lat\": 23.2332,\n  \"lng\": 77.4345,\n  \"nearLandmark\": \"DB Mall\",\n  \"photos\": [\"https://example.com/photo1.jpg\"]\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Property by ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/properties/{{propertyId}}", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Update Property",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/properties/{{propertyId}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"rent\": 11000,\n  \"negotiable\": \"NEGOTIABLE\"\n}" }
+          }
+        },
+        {
+          "name": "Update Status (Mark Rented)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/properties/{{propertyId}}/status",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"RENTED\"\n}" }
+          }
+        },
+        {
+          "name": "My Listings",
+          "request": { "method": "GET", "url": "{{baseUrl}}/properties/my-listings", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Toggle Save",
+          "request": { "method": "POST", "url": "{{baseUrl}}/properties/{{propertyId}}/save", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Get Saved",
+          "request": { "method": "GET", "url": "{{baseUrl}}/properties/saved", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Send Inquiry",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/properties/{{propertyId}}/inquiry",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"message\": \"Is this still available?\"\n}" }
+          }
+        },
+        {
+          "name": "Get Inquiries (Owner)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/properties/{{propertyId}}/inquiries", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Show Number",
+          "request": { "method": "POST", "url": "{{baseUrl}}/properties/{{propertyId}}/show-number", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Compare Properties",
+          "request": { "method": "GET", "url": "{{baseUrl}}/properties/compare?ids={{propertyId}}", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Create Alert",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/properties/alerts",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"city\": \"Bhopal\",\n  \"budgetMin\": 5000,\n  \"budgetMax\": 15000,\n  \"propertyType\": \"TWO_BHK\"\n}" }
+          }
+        },
+        {
+          "name": "Get Alerts",
+          "request": { "method": "GET", "url": "{{baseUrl}}/properties/alerts", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Owner Dashboard",
+          "request": { "method": "GET", "url": "{{baseUrl}}/properties/owner/dashboard", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Delete Property",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/properties/{{propertyId}}", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        }
+      ]
+    },
+    {
+      "name": "🤝 Roommate",
+      "item": [
+        {
+          "name": "Create Profile",
+          "event": [{ "listen": "test", "script": { "exec": ["const json = pm.response.json();", "if (json.data?.id) pm.collectionVariables.set('roommateProfileId', json.data.id);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/roommate/profile",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"photo\": \"https://example.com/photo.jpg\",\n  \"age\": 22,\n  \"gender\": \"MALE\",\n  \"profession\": \"STUDENT\",\n  \"collegeName\": \"MANIT Bhopal\",\n  \"food\": \"VEG\",\n  \"smoking\": \"NO\",\n  \"drinking\": \"NO\",\n  \"sleep\": \"NIGHT_OWL\",\n  \"personality\": \"AMBIVERT\",\n  \"cleanliness\": \"NORMAL\",\n  \"guests\": \"SOMETIMES\",\n  \"noise\": \"OKAY\",\n  \"budgetMin\": 3000,\n  \"budgetMax\": 7000,\n  \"preferredAreas\": [\"MP Nagar\", \"Arera Colony\"],\n  \"bio\": \"Engineering student looking for a chill roommate near college. Neat and tidy.\",\n  \"city\": \"Bhopal\",\n  \"area\": \"MP Nagar\",\n  \"lat\": 23.2332,\n  \"lng\": 77.4345\n}"
+            }
+          }
+        },
+        {
+          "name": "Browse Profiles",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/roommate?city=Bhopal&sort=compatibility", "host": ["{{baseUrl}}"], "path": ["roommate"], "query": [{ "key": "city", "value": "Bhopal" }, { "key": "sort", "value": "compatibility" }] }, "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Get Profile by ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/roommate/{{roommateProfileId}}", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/roommate/profile",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"budgetMax\": 8000,\n  \"bio\": \"Updated: Looking for a studious roommate\"\n}" }
+          }
+        },
+        {
+          "name": "Send Interest",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/roommate/{{roommateProfileId}}/interest",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"message\": \"Hey! I'm also looking for a room in MP Nagar\"\n}" }
+          }
+        },
+        {
+          "name": "Get Interests",
+          "request": { "method": "GET", "url": "{{baseUrl}}/roommate/interests", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Respond to Interest",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/roommate/interests/INTEREST_ID/respond",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"ACCEPTED\"\n}" }
+          }
+        },
+        {
+          "name": "Get Connections",
+          "request": { "method": "GET", "url": "{{baseUrl}}/roommate/connections", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Browse Groups",
+          "request": { "method": "GET", "url": "{{baseUrl}}/roommate/groups?city=Bhopal", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Create Group",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/roommate/groups",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"MANIT Roommates\",\n  \"description\": \"Roommate group for MANIT students\",\n  \"city\": \"Bhopal\"\n}" }
+          }
+        },
+        {
+          "name": "Delete Profile",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/roommate/profile", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        }
+      ]
+    },
+    {
+      "name": "🍽️ Mess / Tiffin",
+      "item": [
+        {
+          "name": "Register Mess",
+          "event": [{ "listen": "test", "script": { "exec": ["const json = pm.response.json();", "if (json.data?.id) pm.collectionVariables.set('messId', json.data.id);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/mess/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Annapurna Mess\",\n  \"ownerName\": \"Rajesh Sharma\",\n  \"description\": \"Home-style vegetarian mess with unlimited food. Special thali on Sundays.\",\n  \"photos\": [\"https://example.com/mess1.jpg\"],\n  \"address\": \"Shop 12, MP Nagar Zone-2\",\n  \"area\": \"MP Nagar\",\n  \"city\": \"Bhopal\",\n  \"pincode\": \"462011\",\n  \"lat\": 23.2332,\n  \"lng\": 77.4345,\n  \"foodType\": \"VEG\",\n  \"mealTypes\": [\"BREAKFAST\", \"LUNCH\", \"DINNER\"],\n  \"timings\": { \"breakfast\": \"7:30-10:00\", \"lunch\": \"12:00-15:00\", \"dinner\": \"19:00-22:00\" },\n  \"pricePerMeal\": 60,\n  \"monthlyOneMeal\": 1500,\n  \"monthlyTwoMeals\": 2800,\n  \"monthlyThreeMeals\": 3800,\n  \"trialMealPrice\": 50,\n  \"deliveryAvailable\": true,\n  \"deliveryRadius\": 3,\n  \"tiffinService\": true,\n  \"seatingCapacity\": 30,\n  \"features\": [\"HOME_STYLE\", \"UNLIMITED_FOOD\", \"SUNDAY_SPECIAL\"]\n}"
+            }
+          }
+        },
+        {
+          "name": "Browse Mess",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/mess?city=Bhopal&foodType=VEG", "host": ["{{baseUrl}}"], "path": ["mess"], "query": [{ "key": "city", "value": "Bhopal" }, { "key": "foodType", "value": "VEG" }] }, "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Get Mess by ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/mess/{{messId}}", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Update Menu",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/mess/menu",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"date\": \"2026-04-04\",\n  \"mealType\": \"LUNCH\",\n  \"items\": [\"Dal Tadka\", \"Rice\", \"Roti\", \"Aloo Gobi\", \"Raita\", \"Salad\"]\n}" }
+          }
+        },
+        {
+          "name": "Get Today's Menu",
+          "request": { "method": "GET", "url": "{{baseUrl}}/mess/{{messId}}/menu", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Toggle Save Mess",
+          "request": { "method": "POST", "url": "{{baseUrl}}/mess/{{messId}}/save", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Get Saved Mess",
+          "request": { "method": "GET", "url": "{{baseUrl}}/mess/saved", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Mess Dashboard",
+          "request": { "method": "GET", "url": "{{baseUrl}}/mess/dashboard", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        }
+      ]
+    },
+    {
+      "name": "👨‍🍳 Cook",
+      "item": [
+        {
+          "name": "Register Cook",
+          "event": [{ "listen": "test", "script": { "exec": ["const json = pm.response.json();", "if (json.data?.id) pm.collectionVariables.set('cookId', json.data.id);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/cook/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Sunita Devi\",\n  \"photo\": \"https://example.com/cook.jpg\",\n  \"gender\": \"FEMALE\",\n  \"age\": 35,\n  \"experience\": 10,\n  \"speciality\": \"VEG\",\n  \"cuisineTypes\": [\"NORTH_INDIAN\", \"RAJASTHANI\"],\n  \"serviceTypes\": [\"DAILY_COOK\", \"MONTHLY_SUBSCRIPTION\"],\n  \"pricePerVisit\": 300,\n  \"monthlyOneMeal\": 4000,\n  \"monthlyTwoMeals\": 7000,\n  \"serviceAreas\": [\"MP Nagar\", \"Arera Colony\", \"Shahpura\"],\n  \"city\": \"Bhopal\",\n  \"pincode\": \"462011\",\n  \"lat\": 23.2332,\n  \"lng\": 77.4345,\n  \"availableSlots\": { \"morning\": \"6:00-10:00\", \"evening\": \"17:00-21:00\" }\n}"
+            }
+          }
+        },
+        {
+          "name": "Browse Cooks",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/cook?city=Bhopal&speciality=VEG", "host": ["{{baseUrl}}"], "path": ["cook"], "query": [{ "key": "city", "value": "Bhopal" }, { "key": "speciality", "value": "VEG" }] }, "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Get Cook by ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/cook/{{cookId}}", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Toggle Save Cook",
+          "request": { "method": "POST", "url": "{{baseUrl}}/cook/{{cookId}}/save", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Get Saved Cooks",
+          "request": { "method": "GET", "url": "{{baseUrl}}/cook/saved", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Cook Dashboard",
+          "request": { "method": "GET", "url": "{{baseUrl}}/cook/dashboard", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        }
+      ]
+    },
+    {
+      "name": "💬 Chat",
+      "item": [
+        {
+          "name": "Get Conversations",
+          "request": { "method": "GET", "url": "{{baseUrl}}/chat/conversations", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Start Conversation",
+          "event": [{ "listen": "test", "script": { "exec": ["const json = pm.response.json();", "if (json.data?.id) pm.collectionVariables.set('conversationId', json.data.id);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/chat/conversations",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"participantId\": \"TARGET_USER_ID\",\n  \"context\": \"PROPERTY\",\n  \"contextId\": \"{{propertyId}}\",\n  \"message\": \"Hi! Is the room still available?\"\n}" }
+          }
+        },
+        {
+          "name": "Get Messages",
+          "request": { "method": "GET", "url": "{{baseUrl}}/chat/conversations/{{conversationId}}", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Send Message",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/chat/conversations/{{conversationId}}/messages",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"content\": \"When can I visit?\",\n  \"type\": \"TEXT\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔔 Notifications",
+      "item": [
+        {
+          "name": "Get All",
+          "request": { "method": "GET", "url": "{{baseUrl}}/notifications", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Unread Count",
+          "request": { "method": "GET", "url": "{{baseUrl}}/notifications/unread-count", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Mark Read",
+          "request": { "method": "PATCH", "url": "{{baseUrl}}/notifications/{{notificationId}}/read", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Mark All Read",
+          "request": { "method": "PATCH", "url": "{{baseUrl}}/notifications/read-all", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        }
+      ]
+    },
+    {
+      "name": "⭐ Reviews",
+      "item": [
+        {
+          "name": "Get Reviews for Property",
+          "request": { "method": "GET", "url": "{{baseUrl}}/reviews/PROPERTY/{{propertyId}}", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        },
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/reviews",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"targetType\": \"PROPERTY\",\n  \"targetId\": \"{{propertyId}}\",\n  \"rating\": 4,\n  \"comment\": \"Good location, clean rooms. Water supply is excellent.\"\n}" }
+          }
+        },
+        {
+          "name": "Update Review",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/reviews/REVIEW_ID",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Updated: Amazing place!\"\n}" }
+          }
+        },
+        {
+          "name": "Delete Review",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/reviews/REVIEW_ID", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }] }
+        }
+      ]
+    },
+    {
+      "name": "🔜 Coming Soon",
+      "item": [
+        {
+          "name": "Get All Services",
+          "request": { "method": "GET", "url": "{{baseUrl}}/coming-soon/services" }
+        },
+        {
+          "name": "Get Service Detail",
+          "request": { "method": "GET", "url": "{{baseUrl}}/coming-soon/services/HOME_SERVICES" }
+        },
+        {
+          "name": "Notify Me",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/coming-soon/services/HOME_SERVICES/notify",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"phone\": \"+919876543210\",\n  \"email\": \"user@example.com\",\n  \"city\": \"Bhopal\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🛡️ Admin",
+      "item": [
+        {
+          "name": "Admin Login",
+          "event": [{ "listen": "test", "script": { "exec": ["const json = pm.response.json();", "if (json.data?.accessToken) pm.collectionVariables.set('adminToken', json.data.accessToken);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/admin/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@projectx.in\",\n  \"password\": \"admin123456\"\n}" }
+          }
+        },
+        {
+          "name": "Dashboard",
+          "request": { "method": "GET", "url": "{{baseUrl}}/admin/dashboard", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }] }
+        },
+        {
+          "name": "Get Users",
+          "request": { "method": "GET", "url": "{{baseUrl}}/admin/users?page=1&limit=20", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }] }
+        },
+        {
+          "name": "Get User Detail",
+          "request": { "method": "GET", "url": "{{baseUrl}}/admin/users/{{userId}}", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }] }
+        },
+        {
+          "name": "Block User",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/admin/users/{{userId}}/block",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"block\": true\n}" }
+          }
+        },
+        {
+          "name": "Get Properties",
+          "request": { "method": "GET", "url": "{{baseUrl}}/admin/properties", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }] }
+        },
+        {
+          "name": "Approve Property",
+          "request": { "method": "PATCH", "url": "{{baseUrl}}/admin/properties/{{propertyId}}/approve", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }] }
+        },
+        {
+          "name": "Reject Property",
+          "request": { "method": "PATCH", "url": "{{baseUrl}}/admin/properties/{{propertyId}}/reject", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }] }
+        },
+        {
+          "name": "Feature Property",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/admin/properties/{{propertyId}}/feature",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"featured\": true\n}" }
+          }
+        },
+        {
+          "name": "Get Reports",
+          "request": { "method": "GET", "url": "{{baseUrl}}/admin/reports?status=PENDING", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }] }
+        },
+        {
+          "name": "Send Notification",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/admin/notifications/send",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Welcome to ProjectX!\",\n  \"body\": \"Explore rooms, roommates, and mess near you.\"\n}" }
+          }
+        },
+        {
+          "name": "Analytics",
+          "request": { "method": "GET", "url": "{{baseUrl}}/admin/analytics", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }] }
+        },
+        {
+          "name": "Coming Soon Stats",
+          "request": { "method": "GET", "url": "{{baseUrl}}/admin/coming-soon/stats", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }] }
+        },
+        {
+          "name": "Get Settings",
+          "request": { "method": "GET", "url": "{{baseUrl}}/admin/settings", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }] }
+        },
+        {
+          "name": "Update Settings",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/admin/settings",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"key\": \"maintenance_mode\",\n  \"value\": false\n}" }
+          }
+        }
+      ]
+    }
+  ]
+}
