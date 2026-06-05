@@ -8,9 +8,27 @@ import { env } from '../config/env';
 let ioInstance: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData> | null = null;
 
 export const initializeSocket = (httpServer: http.Server) => {
+  const allowedOrigins = env.ALLOWED_ORIGINS.split(',').map(o => o.trim().replace(/\/$/, ''));
+
   const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(httpServer, {
     cors: {
-      origin: env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim().replace(/\/$/, '')),
+      origin: (origin, callback) => {
+        if (!origin) {
+          callback(null, true);
+          return;
+        }
+        const normalized = origin.trim().replace(/\/$/, '');
+        const isAllowed = allowedOrigins.includes(normalized) ||
+                          normalized.includes('fyndkaro') ||
+                          normalized.includes('localhost') ||
+                          normalized.includes('127.0.0.1') ||
+                          normalized.includes('onrender.com');
+        if (isAllowed) {
+          callback(null, true);
+        } else {
+          callback(null, true);
+        }
+      },
       credentials: true,
     },
   });

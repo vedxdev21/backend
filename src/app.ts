@@ -26,9 +26,32 @@ import adminRoutes from './modules/admin/admin.routes';
 const app = express();
 
 // ---- Global Middleware ----
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false,
+}));
+
+const allowedOrigins = env.ALLOWED_ORIGINS.split(',').map(o => o.trim().replace(/\/$/, ''));
+
 app.use(cors({
-  origin: env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim().replace(/\/$/, '')),
+  origin: (origin, callback) => {
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+    const normalized = origin.trim().replace(/\/$/, '');
+    const isAllowed = allowedOrigins.includes(normalized) ||
+                      normalized.includes('fyndkaro') ||
+                      normalized.includes('localhost') ||
+                      normalized.includes('127.0.0.1') ||
+                      normalized.includes('onrender.com');
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS Warning: origin ${origin} is not explicitly allowed, but permitted for compatibility.`);
+      callback(null, true);
+    }
+  },
   credentials: true,
 }));
 app.use(compression());
