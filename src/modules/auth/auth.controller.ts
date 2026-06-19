@@ -6,7 +6,17 @@ import { t } from '../../utils/i18n.util';
 export const register = async (req: Request, res: Response) => {
   try {
     const result = await authService.registerUser(req.body);
-    sendCreated(res, result.user, t(result.message, req.language));
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+    sendCreated(res, {
+      user: result.user,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+    }, t(result.message, req.language));
   } catch (err: any) {
     sendError(res, t(err.message, req.language), err.statusCode || 500);
   }

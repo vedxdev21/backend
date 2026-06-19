@@ -33,16 +33,29 @@ export const registerUser = async (data: {
       authProvider: 'EMAIL',
       referralCode,
       interests: data.interests || [],
+      isPhoneVerified: true, // Bypass OTP by marking verified immediately
     },
   });
 
-  // Send OTP for phone verification
-  const otp = generateOtp();
-  await storeOtp(data.phone, otp);
-  await sendOtp(data.phone, otp);
+  const payload: JwtUserPayload = {
+    id: user.id,
+    phone: user.phone,
+    role: user.role,
+    name: user.name,
+  };
+
+  const tokens = generateTokenPair(payload);
+
+  // Save the refresh token
+  const updatedUser = await prisma.user.update({
+    where: { id: user.id },
+    data: { refreshToken: tokens.refreshToken },
+  });
 
   return {
-    user: sanitizeUser(user),
+    user: sanitizeUser(updatedUser),
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
     message: 'auth.register_success',
   };
 };
