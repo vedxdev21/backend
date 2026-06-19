@@ -31,7 +31,7 @@ export const loginPhoneSchema = z.object({
 });
 
 export const loginEmailSchema = z.object({
-  email: z.string().email('Invalid email'),
+  email: z.string().min(1, 'Email or Phone is required'),
   password: z.string().min(1, 'Password is required'),
 });
 

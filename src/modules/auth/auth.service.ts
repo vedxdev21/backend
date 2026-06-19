@@ -132,9 +132,21 @@ export const loginWithPhone = async (phone: string, otp: string) => {
   return verifyOtp(phone, otp);
 };
 
-// ------- Login with Email + Password -------
-export const loginWithEmail = async (email: string, password: string) => {
-  const user = await prisma.user.findFirst({ where: { email } });
+// ------- Login with Email/Phone + Password -------
+export const loginWithEmail = async (emailOrPhone: string, password: string) => {
+  let normalized = emailOrPhone.trim();
+  if (/^\d{10}$/.test(normalized)) {
+    normalized = '+91' + normalized;
+  }
+
+  const user = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: { equals: normalized, mode: 'insensitive' } },
+        { phone: normalized }
+      ]
+    }
+  });
   if (!user || !user.passwordHash) {
     throw { statusCode: 401, message: 'auth.invalid_credentials' };
   }
