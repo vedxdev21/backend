@@ -260,7 +260,7 @@ model User {
   passwordHash    String?
   profilePhoto    String?
   authProvider    AuthProvider  @default(PHONE)
-  googleId        String?      @unique
+  googleId        String?
   role            UserRole     @default(USER)
 
   isPhoneVerified   Boolean @default(false)
@@ -299,6 +299,8 @@ model User {
   reports           Report[]
   comingSoonSignups ComingSoonSignup[]
   referrals         Referral[]           @relation("referrer")
+
+  @@index([googleId])
 }
 
 // ════════════════════════════════════════════

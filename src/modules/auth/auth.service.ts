@@ -135,18 +135,24 @@ export const loginWithPhone = async (phone: string, otp: string) => {
 // ------- Login with Email/Phone + Password -------
 export const loginWithEmail = async (emailOrPhone: string, password: string) => {
   let normalized = emailOrPhone.trim();
-  if (/^\d{10}$/.test(normalized)) {
-    normalized = '+91' + normalized;
-  }
+  let user;
 
-  const user = await prisma.user.findFirst({
-    where: {
-      OR: [
-        { email: { equals: normalized, mode: 'insensitive' } },
-        { phone: normalized }
-      ]
+  if (normalized.includes('@')) {
+    user = await prisma.user.findFirst({
+      where: {
+        email: { equals: normalized, mode: 'insensitive' }
+      }
+    });
+  } else {
+    if (/^\d{10}$/.test(normalized)) {
+      normalized = '+91' + normalized;
     }
-  });
+    user = await prisma.user.findUnique({
+      where: {
+        phone: normalized
+      }
+    });
+  }
   if (!user || !user.passwordHash) {
     throw { statusCode: 401, message: 'auth.invalid_credentials' };
   }
